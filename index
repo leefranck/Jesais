@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Valentine ?</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffe4e1;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        #container {
+            background: white;
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 400px;
+        }
+
+        h1 { color: #d63384; margin-bottom: 2rem; pointer-events: none; }
+
+        .buttons-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            height: 60px;
+        }
+
+        button {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #btn-oui {
+            background-color: #ff4d6d;
+            color: white;
+            transition: transform 0.2s;
+        }
+        #btn-oui:hover { transform: scale(1.1); }
+
+        #btn-non {
+            background-color: #6c757d;
+            color: white;
+            position: relative;
+            z-index: 1000;
+            /* Latence supprimée : transition ultra-courte et directe */
+            transition: left 0.15s ease-out, top 0.15s ease-out;
+            will-change: left, top; /* Optimisation performance */
+        }
+
+        .hidden { display: none; }
+        #success-msg img { max-width: 280px; border-radius: 20px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="question-side">
+            <h1>Est-ce que tu es gay ? 💖</h1>
+            <div class="buttons-wrapper">
+                <button id="btn-oui">Oui</button>
+                <button id="btn-non">Non</button>
+            </div>
+        </div>
+
+        <div id="success-msg" class="hidden">
+            <h1>Ne te cache plus, je le savais déjà 🥰</h1>
+            <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHltdGprcWZ1N2I1bGY5NndycDFzbHkxd3c1bW8xdDcwZ3VnOWNhZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Jj8vFfZNBcCsg/giphy.gif" alt="Sucette">
+        </div>
+    </div>
+
+    <script>
+        const btnNon = document.getElementById('btn-non');
+        const btnOui = document.getElementById('btn-oui');
+        const questionSide = document.getElementById('question-side');
+        const successMsg = document.getElementById('success-msg');
+
+        let hasMoved = false;
+
+        // Fonction de déplacement
+        const escape = (e) => {
+            const rect = btnNon.getBoundingClientRect();
+            
+            // On vérifie si la souris est à 3px (ou déjà dessus)
+            const isNear = e.clientX >= rect.left - 3 && 
+                           e.clientX <= rect.right + 3 &&
+                           e.clientY >= rect.top - 3 && 
+                           e.clientY <= rect.bottom + 3;
+
+            if (isNear) {
+                if (!hasMoved) {
+                    btnNon.style.position = 'fixed';
+                    btnNon.style.left = rect.left + 'px';
+                    btnNon.style.top = rect.top + 'px';
+                    hasMoved = true;
+                }
+
+                const btnCenterX = rect.left + rect.width / 2;
+                const btnCenterY = rect.top + rect.height / 2;
+
+                // Angle de fuite avec feinte aléatoire
+                let angle = Math.atan2(btnCenterY - e.clientY, btnCenterX - e.clientX);
+                angle += (Math.random() - 0.5) * Math.PI; // Feinte de +/- 90 degrés
+
+                // Distance de bond
+                const distance = 200 + Math.random() * 150;
+
+                let newX = btnCenterX + Math.cos(angle) * distance;
+                let newY = btnCenterY + Math.sin(angle) * distance;
+
+                // Limites écran
+                const p = 100;
+                newX = Math.max(p, Math.min(window.innerWidth - p, newX));
+                newY = Math.max(p, Math.min(window.innerHeight - p, newY));
+
+                btnNon.style.left = `${newX - rect.width / 2}px`;
+                btnNon.style.top = `${newY - rect.height / 2}px`;
+            }
+        };
+
+        // On écoute le mouvement de souris partout
+        document.addEventListener('mousemove', escape);
+        
+        // Sécurité supplémentaire : si le curseur entre trop vite dans le bouton
+        btnNon.addEventListener('mouseenter', escape);
+
+        btnOui.addEventListener('click', () => {
+            questionSide.classList.add('hidden');
+            successMsg.classList.remove('hidden');
+            document.body.style.backgroundColor = '#ffc0cb';
+            btnNon.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
